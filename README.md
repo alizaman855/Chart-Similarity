@@ -1,1 +1,1 @@
-#  Similarity App
+# Chart Similarity App
