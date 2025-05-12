@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Chart Similarity Analyzer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1e88e5;
+            --secondary-color: #42a5f5;
+            --accent-color: #64b5f6;
+            --success-color: #43a047;
+            --warning-color: #ffa000;
+            --error-color: #e53935;
+            --background-color: #f5f5f5;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --text-muted: #757575;
+            --border-color: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            
+            /* Category colors */
+            --gold-color: #FFD700;
+            --btc-color: #F7931A;
+            --usdcad-color: #4CAF50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            box-shadow: var(--shadow);
+        }
+
+        header h1 {
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+        }
+
+        header h1 i {
+            margin-right: 10px;
+        }
+
+        .main-content {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title i {
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+
+        /* Upload Form Styles */
+        .drop-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .drop-area:hover, .drop-area.active {
+            border-color: var(--primary-color);
+            background-color: rgba(30, 136, 229, 0.05);
+        }
+
+        .drop-area i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .drop-area p {
+            margin-bottom: 10px;
+            color: var(--text-muted);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .file-info i {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+
+        .file-info .file-name {
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-info .remove-file {
+            color: var(--error-color);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .upload-btn, .analyze-btn, button.primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .upload-btn:hover, .analyze-btn:hover, button.primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .upload-btn i, .analyze-btn i, button.primary i {
+            margin-right: 8px;
+        }
+
+        .upload-btn:disabled, .analyze-btn:disabled, button.primary:disabled {
+            background-color: var(--border-color);
+            cursor: not-allowed;
+        }
+
+        /* Settings Form */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        /* Category Selector */
+        .category-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .category-option {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-option i {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .category-option.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(30, 136, 229, 0.05);
+            font-weight: 600;
+        }
+
+        .category-gold {
+            border-color: var(--gold-color);
+            color: var(--gold-color);
+        }
+
+        .category-gold.selected {
+            background-color: rgba(255, 215, 0, 0.1);
+            border-color: var(--gold-color);
+        }
+
+        .category-btc {
+            border-color: var(--btc-color);
+            color: var(--btc-color);
+        }
+
+        .category-btc.selected {
+            background-color: rgba(247, 147, 26, 0.1);
+            border-color: var(--btc-color);
+        }
+
+        .category-usdcad {
+            border-color: var(--usdcad-color);
+            color: var(--usdcad-color);
+        }
+
+        .category-usdcad.selected {
+            background-color: rgba(76, 175, 80, 0.1);
+            border-color: var(--usdcad-color);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Results Area */
+        .results-area {
+            display: none;
+        }
+
+        .results-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Similar Frames */
+        .similar-frames {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .frame-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .frame-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .frame-card.selected {
+            border: 2px solid var(--primary-color);
+        }
+
+        .frame-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .frame-info {
+            padding: 15px;
+        }
+
+        .frame-time {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .similarity-score {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .similarity-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+
+        .high-similarity {
+            background-color: var(--success-color);
+        }
+
+        .medium-similarity {
+            background-color: var(--warning-color);
+        }
+
+        .low-similarity {
+            background-color: var(--error-color);
+        }
+
+        /* Frame Details */
+        .frame-details {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .details-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .detail-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .detail-card-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 15px;
+            font-weight: 500;
+        }
+
+        .detail-card-body {
+            padding: 15px;
+        }
+
+        .detail-card-body img {
+            width: 100%;
+            border-radius: 4px;
+        }
+
+        .chart-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .comparison-card {
+            text-align: center;
+        }
+
+        .comparison-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* Jobs List */
+        .jobs-list {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .job-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .job-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .job-item.active {
+            background-color: rgba(30, 136, 229, 0.1);
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .category-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .indicator-gold {
+            background-color: var(--gold-color);
+        }
+
+        .indicator-btc {
+            background-color: var(--btc-color);
+        }
+
+        .indicator-usdcad {
+            background-color: var(--usdcad-color);
+        }
+
+        .job-status {
+            margin-right: 10px;
+            font-size: 0.8rem;
+        }
+
+        .status-uploaded {
+            color: var(--text-muted);
+        }
+
+        .status-processing {
+            color: var(--warning-color);
+        }
+
+        .status-completed {
+            color: var(--success-color);
+        }
+
+        .status-failed {
+            color: var(--error-color);
+        }
+
+        .job-info {
+            flex-grow: 1;
+        }
+
+        .job-filename {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .job-time {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .job-actions {
+            display: flex;
+        }
+
+        .job-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .job-actions button:hover {
+            color: var(--primary-color);
+        }
+
+        .job-actions button.delete:hover {
+            color: var(--error-color);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s infinite linear;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .alert-success {
+            background-color: rgba(67, 160, 71, 0.1);
+            color: var(--success-color);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .alert-warning {
+            background-color: rgba(255, 160, 0, 0.1);
+            color: var(--warning-color);
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .alert-error {
+            background-color: rgba(229, 57, 53, 0.1);
+            color: var(--error-color);
+            border-left: 4px solid var(--error-color);
+        }
+
+        /* Similarity plot */
+        .similarity-plot {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+        }
+
+        #colorLegend {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 0 10px 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+            border-radius: 3px;
+        }
+
+        .red-color {
+            background-color: red;
+        }
+
+        .blue-color {
+            background-color: blue;
+        }
+
+        .purple-color {
+            background-color: purple;
+        }
+
+        /* Category tabs for jobs */
+        .category-tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .category-tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-bottom: 2px solid transparent;
+        }
+
+        .category-tab.active {
+            border-bottom-color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .category-tab:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .category-tab-all {
+            color: var(--primary-color);
+        }
+
+        .category-tab-gold {
+            color: var(--gold-color);
+        }
+
+        .category-tab-btc {
+            color: var(--btc-color);
+        }
+
+        .category-tab-usdcad {
+            color: var(--usdcad-color);
+        }
+
+        /* Section headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .section-header-gold {
+            color: var(--gold-color);
+            border-bottom-color: var(--gold-color);
+        }
+
+        .section-header-btc {
+            color: var(--btc-color);
+            border-bottom-color: var(--btc-color);
+        }
+
+        .section-header-usdcad {
+            color: var(--usdcad-color);
+            border-bottom-color: var(--usdcad-color);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-chart-line"></i> Chart Similarity Analyzer</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Upload Section -->
+                <div class="card" id="uploadCard">
+                    <div class="card-title">
+                        <span><i class="fas fa-upload"></i> Upload Video</span>
+                    </div>
+                    
+                    <!-- Category Selection -->
+                    <div class="section-header">
+                        <span>Select Market Category</span>
+                    </div>
+                    
+                    <div class="category-selector" id="categorySelector">
+                        <div class="category-option category-gold" data-category="gold">
+                            <i class="fas fa-coins"></i>
+                            <span>Gold</span>
+                        </div>
+                        <div class="category-option category-btc" data-category="btc">
+                            <i class="fab fa-bitcoin"></i>
+                            <span>BTC</span>
+                        </div>
+                        <div class="category-option category-usdcad" data-category="usdcad">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>USDCAD</span>
+                        </div>
+                    </div>
+                    
+                    <div class="drop-area" id="dropArea">
+                        <i class="fas fa-file-video"></i>
+                        <p>Drag & drop your video file here</p>
+                        <p>or</p>
+                        <button class="upload-btn" id="selectFileBtn">
+                            <i class="fas fa-folder-open"></i> Select Video
+                        </button>
+                        <input type="file" id="fileInput" style="display: none" accept="video/*">
+                    </div>
+                    
+                    <div class="file-info hidden" id="fileInfo">
+                        <i class="fas fa-file-video"></i>
+                        <div class="file-name" id="fileName"></div>
+                        <div class="remove-file" id="removeFile">
+                            <i class="fas fa-times"></i>
+                        </div>
+                    </div>
+                    
+                    <button class="upload-btn" id="uploadBtn" disabled>
+                        <i class="fas fa-cloud-upload-alt"></i> Upload Video
+                    </button>
+                </div>
+                
+                <!-- Settings Section -->
+                <div class="card" id="settingsCard">
+                    <div class="card-title">
+                        <span><i class="fas fa-cog"></i> Analysis Settings</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fpsInput">Frames Per Second (FPS)</label>
+                        <input type="number" id="fpsInput" min="0.1" max="10" step="0.1" value="1.0">
+                        <small style="color: var(--text-muted);">Lower values for better accuracy, higher for faster processing</small>
+                    </div>
+                    
+                    <button class="analyze-btn" id="analyzeBtn" disabled>
+                        <i class="fas fa-play"></i> Start Analysis
+                    </button>
+                    
+                    <!-- Progress Section -->
+                    <div class="progress-container hidden" id="progressContainer">
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-info">
+                            <span id="progressStatus">Processing...</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Jobs Section -->
+                <div class="card">
+                    <div class="card-title">
+                        <span><i class="fas fa-history"></i> Recent Jobs</span>
+                        <button id="refreshJobs" style="background: none; border: none; cursor: pointer; color: var(--primary-color);">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Category Filter Tabs -->
+                    <div class="category-tabs" id="categoryTabs">
+                        <div class="category-tab category-tab-all active" data-filter="all">All</div>
+                        <div class="category-tab category-tab-gold" data-filter="gold">Gold</div>
+                        <div class="category-tab category-tab-btc" data-filter="btc">BTC</div>
+                        <div class="category-tab category-tab-usdcad" data-filter="usdcad">USDCAD</div>
+                    </div>
+                    
+                    <ul class="jobs-list" id="jobsList">
+                        <!-- Jobs will be inserted here dynamically -->
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Main Results Area -->
+            <div class="results-area" id="resultsArea">
+                <div class="card">
+                    <div class="card-title">
+                        <span id="resultsCategoryTitle"><i class="fas fa-chart-bar"></i> Analysis Results</span>
+                    </div>
+                    
+                    <div class="results-tabs">
+                        <div class="tab active" data-tab="similarFrames">Similar Frames</div>
+                        <div class="tab" data-tab="similarityPlot">Similarity Plot</div>
+                        <div class="tab" data-tab="help">Help & About</div>
+                    </div>
+                    
+                    <!-- Similar Frames Tab -->
+                    <div class="tab-content active" id="similarFrames">
+                        <div class="similar-frames" id="framesGrid">
+                            <!-- Frame cards will be inserted here dynamically -->
+                        </div>
+                        
+                        <!-- Frame Details -->
+                        <div class="frame-details" id="frameDetails">
+                            <h3 class="frame-detail-title">Frame Analysis Details</h3>
+                            
+                            <div class="details-grid">
+                                <!-- Original Frame -->
+                                <div class="detail-card">
+                                    <div class="detail-card-header">Original Frame</div>
+                                    <div class="detail-card-body">
+                                        <img id="detailFrameImg" src="" alt="Frame">
+                                    </div>
+                                </div>
+                                
+                                <!-- Chart Overlay -->
+                                <div class="detail-card">
+                                    <div class="detail-card-header">Chart Overlay</div>
+                                    <div class="detail-card-body">
+                                        <img id="detailOverlayImg" src="" alt="Chart Overlay">
+                                        <div id="colorLegend">
+                                            <div class="legend-item">
+                                                <div class="legend-color red-color"></div>
+                                                <span>Left Chart</span>
+                                            </div>
+                                            <div class="legend-item">
+                                                <div class="legend-color blue-color"></div>
+                                                <span>Right Chart</span>
+                                            </div>
+                                            <div class="legend-item">
+                                                <div class="legend-color purple-color"></div>
+                                                <span>Overlap</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Profile Comparison -->
+                                <div class="detail-card">
+                                    <div class="detail-card-header">Price Movement Comparison</div>
+                                    <div class="detail-card-body">
+                                        <img id="detailProfileImg" src="" alt="Profile Comparison">
+                                    </div>
+                                </div>
+                                
+                                <!-- Charts Side by Side -->
+                                <div class="detail-card">
+                                    <div class="detail-card-header">Chart Comparison</div>
+                                    <div class="detail-card-body">
+                                        <div class="chart-comparison">
+                                            <div class="comparison-card">
+                                                <div class="comparison-title">Left Chart</div>
+                                                <img id="leftChartImg" src="" alt="Left Chart">
+                                            </div>
+                                            <div class="comparison-card">
+                                                <div class="comparison-title">Right Chart</div>
+                                                <img id="rightChartImg" src="" alt="Right Chart">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Similarity Plot Tab -->
+                    <div class="tab-content" id="similarityPlot">
+                        <img id="similarityPlotImg" class="similarity-plot" src="" alt="Similarity Plot">
+                        <p class="plot-explanation">
+                            This chart shows the similarity scores throughout the video. Higher values indicate more similar chart patterns between the left and right sides. Red vertical lines mark the most similar frames.
+                        </p>
+                    </div>
+                    
+                    <!-- Help Tab -->
+                    <div class="tab-content" id="help">
+                        <h3>How to Use This Tool</h3>
+                        <ol style="margin-left: 20px; margin-bottom: 20px;">
+                            <li>Select a market category (Gold, BTC, or USDCAD)</li>
+                            <li>Upload a video file containing charts with a vertical divider.</li>
+                            <li>Configure the analysis settings (FPS rate).</li>
+                            <li>Start the analysis process.</li>
+                            <li>View the results showing frames with the most similar chart patterns.</li>
+                            <li>Click on a frame to see detailed comparison and analysis.</li>
+                        </ol>
+                        
+                        <h3>About the Analysis</h3>
+                        <p>This tool analyzes video frames to find instances where charts on the left and right sides of a vertical divider show similar patterns. The analysis process:</p>
+                        <ul style="margin-left: 20px; margin-bottom: 20px;">
+                            <li>Splits each frame at the vertical divider</li>
+                            <li>Crops the chart areas to exclude price lines</li>
+                            <li>Extracts the green chart lines</li>
+                            <li>Analyzes the similarity between the left and right chart patterns</li>
+                            <li>Identifies frames with the highest similarity scores</li>
+                        </ul>
+                        
+                        <h3>Understanding the Results</h3>
+                        <p>The similarity score combines correlation and structural similarity measures. In the chart overlay:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><span style="color: red;">Red</span> represents the left chart pattern</li>
+                            <li><span style="color: blue;">Blue</span> represents the right chart pattern</li>
+                            <li><span style="color: purple;">Purple</span> shows where the patterns overlap</li>
+                        </ul>
+                        
+                        <h3>Market Categories</h3>
+                        <p>The tool organizes analyses by market category:</p>
+                        <ul style="margin-left: 20px;">
+                            <li><span style="color: var(--gold-color);">Gold</span>: For analyzing gold market charts</li>
+                            <li><span style="color: var(--btc-color);">BTC</span>: For analyzing Bitcoin market charts</li>
+                            <li><span style="color: var(--usdcad-color);">USDCAD</span>: For analyzing USD/CAD currency pair charts</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // DOM Elements
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const selectFileBtn = document.getElementById('selectFileBtn');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const removeFile = document.getElementById('removeFile');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressStatus = document.getElementById('progressStatus');
+        const progressPercent = document.getElementById('progressPercent');
+        const resultsArea = document.getElementById('resultsArea');
+        const framesGrid = document.getElementById('framesGrid');
+        const frameDetails = document.getElementById('frameDetails');
+        const jobsList = document.getElementById('jobsList');
+        const refreshJobs = document.getElementById('refreshJobs');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const similarityPlotImg = document.getElementById('similarityPlotImg');
+        const categorySelector = document.getElementById('categorySelector');
+        const categoryTabs = document.getElementById('categoryTabs');
+        const resultsCategoryTitle = document.getElementById('resultsCategoryTitle');
+        
+        // Detail images
+        const detailFrameImg = document.getElementById('detailFrameImg');
+        const detailOverlayImg = document.getElementById('detailOverlayImg');
+        const detailProfileImg = document.getElementById('detailProfileImg');
+        const leftChartImg = document.getElementById('leftChartImg');
+        const rightChartImg = document.getElementById('rightChartImg');
+        
+        // State variables
+        let selectedFile = null;
+        let currentJobId = null;
+        let analysisComplete = false;
+        let pollingInterval = null;
+        let activeFrameCard = null;
+        let selectedCategory = null;
+        let currentCategoryFilter = 'all';
+        
+        // API endpoints - explicitly set to localhost:5000
+        const API_BASE_URL = "http://localhost:5000";
+        const UPLOAD_ENDPOINT = `${API_BASE_URL}/api/upload`;
+        const ANALYZE_ENDPOINT = `${API_BASE_URL}/api/analyze`;
+        const JOB_STATUS_ENDPOINT = `${API_BASE_URL}/api/job`;
+        const JOBS_LIST_ENDPOINT = `${API_BASE_URL}/api/jobs`;
+        
+        // Category icons and names mapping
+        const categoryInfo = {
+            gold: {
+                icon: '<i class="fas fa-coins"></i>',
+                name: 'Gold',
+                color: 'var(--gold-color)'
+            },
+            btc: {
+                icon: '<i class="fab fa-bitcoin"></i>',
+                name: 'Bitcoin',
+                color: 'var(--btc-color)'
+            },
+            usdcad: {
+                icon: '<i class="fas fa-dollar-sign"></i>',
+                name: 'USD/CAD',
+                color: 'var(--usdcad-color)'
+            }
+        };
+        
+        // Event Listeners
+        
+        // Category Selection
+        document.querySelectorAll('.category-option').forEach(option => {
+            option.addEventListener('click', () => {
+                // Remove selected class from all options
+                document.querySelectorAll('.category-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked option
+                option.classList.add('selected');
+                
+                // Update selected category
+                selectedCategory = option.dataset.category;
+                
+                // Enable file selection if category is selected
+                if (selectedCategory) {
+                    dropArea.classList.remove('disabled');
+                    selectFileBtn.disabled = false;
+                }
+                
+                // Update UI to reflect selected category
+                updateCategoryUI(selectedCategory);
+            });
+        });
+        
+        // Category Tabs for filtering jobs
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                document.querySelectorAll('.category-tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Update filter and refresh jobs list
+                currentCategoryFilter = tab.dataset.filter;
+                loadJobsList();
+            });
+        });
+        
+        // File Drop Area
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (selectedCategory) {
+                dropArea.classList.add('active');
+            }
+        });
+        
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('active');
+        });
+        
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('active');
+            
+            if (!selectedCategory) {
+                showAlert('Please select a market category first.', 'warning');
+                return;
+            }
+            
+            if (e.dataTransfer.files.length) {
+                handleFileSelection(e.dataTransfer.files[0]);
+            }
+        });
+        
+        // File Selection Button
+        selectFileBtn.addEventListener('click', () => {
+            if (!selectedCategory) {
+                showAlert('Please select a market category first.', 'warning');
+                return;
+            }
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFileSelection(e.target.files[0]);
+            }
+        });
+        
+        // Remove File Button
+        removeFile.addEventListener('click', () => {
+            resetFileSelection();
+        });
+        
+        // Upload Button
+        uploadBtn.addEventListener('click', () => {
+            if (selectedFile && selectedCategory) {
+                uploadVideo();
+            } else if (!selectedCategory) {
+                showAlert('Please select a market category first.', 'warning');
+            }
+        });
+        
+        // Analyze Button
+        analyzeBtn.addEventListener('click', () => {
+            if (currentJobId) {
+                startAnalysis();
+            }
+        });
+        
+        // Refresh Jobs Button
+        refreshJobs.addEventListener('click', () => {
+            loadJobsList();
+        });
+        
+        // Tabs
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Show corresponding content
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === tabId) {
+                        content.classList.add('active');
+                    }
+                });
+            });
+        });
+        
+        // Functions
+        
+        function updateCategoryUI(category) {
+            if (!category) return;
+            
+            // Update results title with category info
+            const info = categoryInfo[category];
+            resultsCategoryTitle.innerHTML = `${info.icon} ${info.name} Analysis Results`;
+            resultsCategoryTitle.style.color = info.color;
+            
+            // Update detail card headers to match category color
+            document.querySelectorAll('.detail-card-header').forEach(header => {
+                header.style.backgroundColor = info.color;
+            });
+        }
+        
+        function handleFileSelection(file) {
+            // Check if file is a video
+            if (!file.type.startsWith('video/')) {
+                showAlert('Please select a valid video file.', 'error');
+                return;
+            }
+            
+            if (!selectedCategory) {
+                showAlert('Please select a market category first.', 'warning');
+                return;
+            }
+            
+            selectedFile = file;
+            fileName.textContent = file.name;
+            fileInfo.classList.remove('hidden');
+            uploadBtn.disabled = false;
+        }
+        
+        function resetFileSelection() {
+            selectedFile = null;
+            fileName.textContent = '';
+            fileInfo.classList.add('hidden');
+            fileInput.value = '';
+            uploadBtn.disabled = true;
+        }
+        
+        function resetUIState() {
+            // Reset file selection
+            resetFileSelection();
+            
+            // Reset progress
+            progressContainer.classList.add('hidden');
+            progressBar.style.width = '0%';
+            progressStatus.textContent = 'Processing...';
+            progressPercent.textContent = '0%';
+            
+            // Hide results
+            resultsArea.style.display = 'none';
+            frameDetails.style.display = 'none';
+            
+            // Reset active frame card
+            activeFrameCard = null;
+            
+            // Clear polling interval
+            clearInterval(pollingInterval);
+        }
+        
+        async function uploadVideo() {
+            try {
+                uploadBtn.disabled = true;
+                uploadBtn.innerHTML = '<div class="spinner"></div> Uploading...';
+                
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                formData.append('category', selectedCategory); // Add category to form data
+                
+                const response = await fetch(UPLOAD_ENDPOINT, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Upload failed');
+                }
+                
+                const data = await response.json();
+                currentJobId = data.job_id;
+                
+                showAlert(`Video uploaded successfully to ${categoryInfo[selectedCategory].name} category!`, 'success');
+                analyzeBtn.disabled = false;
+                
+            } catch (error) {
+                showAlert('Failed to upload video: ' + error.message, 'error');
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Upload Video';
+            }
+        }
+        
+        async function startAnalysis() {
+            try {
+                analyzeBtn.disabled = true;
+                analyzeBtn.innerHTML = '<div class="spinner"></div> Starting...';
+                
+                const fps = parseFloat(document.getElementById('fpsInput').value) || 1.0;
+                
+                const response = await fetch(`${ANALYZE_ENDPOINT}/${currentJobId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        fps: fps,
+                        category: selectedCategory // Include category in analysis request
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Analysis request failed');
+                }
+                
+                // Show progress bar
+                progressContainer.classList.remove('hidden');
+                progressBar.style.width = '0%';
+                progressStatus.textContent = 'Processing...';
+                progressPercent.textContent = '0%';
+                
+                // Start polling for job status
+                startPolling();
+                
+            } catch (error) {
+                showAlert('Failed to start analysis: ' + error.message, 'error');
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '<i class="fas fa-play"></i> Start Analysis';
+            }
+        }
+        
+        function startPolling() {
+            clearInterval(pollingInterval);
+            
+            pollingInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${JOB_STATUS_ENDPOINT}/${currentJobId}`);
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to get job status');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Update progress
+                    const progress = data.progress || 0;
+                    progressBar.style.width = `${progress}%`;
+                    progressPercent.textContent = `${progress}%`;
+                    
+                    if (data.status === 'processing') {
+                        progressStatus.textContent = 'Processing...';
+                    } else if (data.status === 'completed') {
+                        progressStatus.textContent = 'Complete!';
+                        clearInterval(pollingInterval);
+                        
+                        // Show results
+                        displayResults(data.results);
+                        
+                        // Reset buttons
+                        analyzeBtn.disabled = false;
+                        analyzeBtn.innerHTML = '<i class="fas fa-play"></i> Start Analysis';
+                        
+                        // Refresh jobs list
+                        loadJobsList();
+                    } else if (data.status === 'failed') {
+                        progressStatus.textContent = 'Failed!';
+                        clearInterval(pollingInterval);
+                        
+                        showAlert('Analysis failed: ' + (data.error || 'Unknown error'), 'error');
+                        
+                        // Reset buttons
+                        analyzeBtn.disabled = false;
+                        analyzeBtn.innerHTML = '<i class="fas fa-play"></i> Start Analysis';
+                    }
+                    
+                } catch (error) {
+                    console.error('Polling error:', error);
+                }
+            }, 1000);
+        }
+        
+        function displayResults(results) {
+            if (!results || !results.top_frames || results.top_frames.length === 0) {
+                showAlert('No similar frames found in the video.', 'warning');
+                return;
+            }
+            
+            // Update results category title
+            if (results.category) {
+                selectedCategory = results.category;
+                updateCategoryUI(selectedCategory);
+            }
+            
+            // Show results area
+            resultsArea.style.display = 'block';
+            
+            // Clear previous results
+            framesGrid.innerHTML = '';
+            
+            // Sort frames by similarity score (highest first)
+            const sortedFrames = [...results.top_frames].sort((a, b) => b.similarity - a.similarity);
+            
+            // Display frames
+            sortedFrames.forEach((frame, index) => {
+                const card = document.createElement('div');
+                card.className = 'frame-card';
+                card.dataset.frameIndex = index;
+                
+                // Get similarity class
+                let similarityClass = 'low-similarity';
+                if (frame.similarity > 0.8) {
+                    similarityClass = 'high-similarity';
+                } else if (frame.similarity > 0.5) {
+                    similarityClass = 'medium-similarity';
+                }
+                
+                // Create the frame number string with leading zeros
+                const frameNumStr = frame.frame_number.toString().padStart(6, '0');
+                
+                // Store frame data in the card for easy access
+                card.dataset.frameNumber = frameNumStr;
+                card.dataset.time = frame.time;
+                card.dataset.similarity = frame.similarity;
+                card.dataset.framePath = frame.frame_path;
+                card.dataset.overlayPath = frame.overlay_path;
+                card.dataset.profilePath = frame.profile_path;
+                
+                // Fix path to display the frame image correctly
+                const framePath = frame.frame_path.replace('results/', '');
+                
+                card.innerHTML = `
+                    <img class="frame-img" src="${API_BASE_URL}/results/${framePath}" alt="Frame at ${frame.time.toFixed(2)}s">
+                    <div class="frame-info">
+                        <div class="frame-time">Time: ${frame.time.toFixed(2)}s</div>
+                        <div class="similarity-score">
+                            Similarity: ${frame.similarity.toFixed(4)}
+                            <span class="similarity-badge ${similarityClass}">${(frame.similarity * 100).toFixed(0)}%</span>
+                        </div>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    showFrameDetails(frame, index);
+                    
+                    // Update selected card
+                    if (activeFrameCard) {
+                        activeFrameCard.classList.remove('selected');
+                    }
+                    card.classList.add('selected');
+                    activeFrameCard = card;
+                });
+                
+                framesGrid.appendChild(card);
+                
+                // Auto-select first frame
+                if (index === 0) {
+                    setTimeout(() => {
+                        card.click();
+                    }, 100);
+                }
+            });
+            
+            // Set similarity plot
+            if (results.similarity_plot) {
+                similarityPlotImg.src = `${API_BASE_URL}/results/${results.similarity_plot}`;
+            }
+        }
+        
+        function showFrameDetails(frame, index) {
+            // Show details area
+            frameDetails.style.display = 'block';
+            
+            // Format frame number with leading zeros
+            const frameNumStr = frame.frame_number.toString().padStart(6, '0');
+            
+            // Log paths for debugging
+            console.log("Frame number:", frameNumStr);
+            console.log("Current job ID:", currentJobId);
+            console.log("Current category:", selectedCategory);
+            
+            // Build path prefix with category
+            const pathPrefix = `${API_BASE_URL}/results/${currentJobId}`;
+            
+            // Set images with the correct paths including category
+            detailFrameImg.src = `${pathPrefix}/frame_${frameNumStr}.jpg`;
+            detailOverlayImg.src = `${pathPrefix}/overlay_${frameNumStr}.png`;
+            detailProfileImg.src = `${pathPrefix}/profile_${frameNumStr}.png`;
+            leftChartImg.src = `${pathPrefix}/left_${frameNumStr}.jpg`;
+            rightChartImg.src = `${pathPrefix}/right_${frameNumStr}.jpg`;
+            
+            // Log image paths for debugging
+            console.log("Frame image:", detailFrameImg.src);
+            console.log("Overlay image:", detailOverlayImg.src);
+            console.log("Profile image:", detailProfileImg.src);
+            console.log("Left chart:", leftChartImg.src);
+            console.log("Right chart:", rightChartImg.src);
+            
+            // Add error handlers for images
+            detailFrameImg.onerror = () => handleImageError(detailFrameImg, "Failed to load frame image");
+            detailOverlayImg.onerror = () => handleImageError(detailOverlayImg, "Failed to load overlay image");
+            detailProfileImg.onerror = () => handleImageError(detailProfileImg, "Failed to load profile image");
+            leftChartImg.onerror = () => handleImageError(leftChartImg, "Failed to load left chart image");
+            rightChartImg.onerror = () => handleImageError(rightChartImg, "Failed to load right chart image");
+            
+            // Scroll to details
+            frameDetails.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function handleImageError(imgElement, errorMessage) {
+            console.error(errorMessage, imgElement.src);
+            // Replace with a placeholder or error image
+            imgElement.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f0f0f0'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' text-anchor='middle' alignment-baseline='middle' fill='%23999'%3EImage not found%3C/text%3E%3C/svg%3E";
+            imgElement.alt = "Image not available";
+        }
+        
+        async function loadJobsList() {
+            try {
+                const response = await fetch(JOBS_LIST_ENDPOINT);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load jobs');
+                }
+                
+                const data = await response.json();
+                
+                // Clear list
+                jobsList.innerHTML = '';
+                
+                if (data.jobs && data.jobs.length > 0) {
+                    // Filter jobs by category if necessary
+                    const filteredJobs = currentCategoryFilter === 'all' 
+                        ? data.jobs 
+                        : data.jobs.filter(job => job.category === currentCategoryFilter);
+                    
+                    if (filteredJobs.length === 0) {
+                        jobsList.innerHTML = `<li style="padding: 10px; color: var(--text-muted);">No jobs found for ${categoryInfo[currentCategoryFilter]?.name || 'this category'}</li>`;
+                        return;
+                    }
+                    
+                    filteredJobs.forEach(job => {
+                        const li = document.createElement('li');
+                        li.className = 'job-item';
+                        
+                        if (job.id === currentJobId) {
+                            li.classList.add('active');
+                        }
+                        
+                        // Format time
+                        const jobTime = formatTimeAgo(job.created_at);
+                        
+                        // Get status icon
+                        let statusIcon = '';
+                        let statusClass = '';
+                        
+                        switch (job.status) {
+                            case 'uploaded':
+                                statusIcon = '<i class="fas fa-file-upload"></i>';
+                                statusClass = 'status-uploaded';
+                                break;
+                            case 'processing':
+                                statusIcon = '<i class="fas fa-spinner fa-spin"></i>';
+                                statusClass = 'status-processing';
+                                break;
+                            case 'completed':
+                                statusIcon = '<i class="fas fa-check-circle"></i>';
+                                statusClass = 'status-completed';
+                                break;
+                            case 'failed':
+                                statusIcon = '<i class="fas fa-exclamation-circle"></i>';
+                                statusClass = 'status-failed';
+                                break;
+                            default:
+                                statusIcon = '<i class="fas fa-question-circle"></i>';
+                                statusClass = 'status-uploaded';
+                        }
+                        
+                        // Get category indicator
+                        const categoryClass = job.category ? `indicator-${job.category}` : '';
+                        
+                        li.innerHTML = `
+                            <div class="category-indicator ${categoryClass}"></div>
+                            <span class="job-status ${statusClass}">${statusIcon}</span>
+                            <div class="job-info">
+                                <div class="job-filename">${job.filename}</div>
+                                <div class="job-time">${jobTime} ${job.category ? `· ${categoryInfo[job.category]?.name || job.category}` : ''}</div>
+                            </div>
+                            <div class="job-actions">
+                                <button class="delete" data-job-id="${job.id}"><i class="fas fa-trash"></i></button>
+                            </div>
+                        `;
+                        
+                        // Add click event to load job
+                        li.addEventListener('click', (e) => {
+                            // Ignore if clicked on delete button
+                            if (e.target.closest('.delete')) {
+                                return;
+                            }
+                            
+                            loadJob(job.id);
+                        });
+                        
+                        jobsList.appendChild(li);
+                    });
+                    
+                    // Add delete event listeners
+                    document.querySelectorAll('.delete').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const jobId = button.getAttribute('data-job-id');
+                            deleteJob(jobId);
+                        });
+                    });
+                } else {
+                    jobsList.innerHTML = '<li style="padding: 10px; color: var(--text-muted);">No jobs found</li>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+                jobsList.innerHTML = '<li style="padding: 10px; color: var(--error-color);">Failed to load jobs</li>';
+            }
+        }
+        
+        async function loadJob(jobId) {
+            try {
+                // Reset UI state first
+                resetUIState();
+                
+                const response = await fetch(`${JOB_STATUS_ENDPOINT}/${jobId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load job');
+                }
+                
+                const data = await response.json();
+                
+                // Update current job
+                currentJobId = jobId;
+                
+                // Update selected category if available
+                if (data.category) {
+                    selectedCategory = data.category;
+                    
+                    // Update category selection UI
+                    document.querySelectorAll('.category-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                        if (opt.dataset.category === selectedCategory) {
+                            opt.classList.add('selected');
+                        }
+                    });
+                    
+                    // Update UI to reflect selected category
+                    updateCategoryUI(selectedCategory);
+                }
+                
+                // Update UI based on job status
+                if (data.status === 'uploaded') {
+                    // Enable analyze button
+                    analyzeBtn.disabled = false;
+                    
+                    // Update file info
+                    fileName.textContent = data.filename;
+                    fileInfo.classList.remove('hidden');
+                    
+                    // Hide results
+                    resultsArea.style.display = 'none';
+                    
+                } else if (data.status === 'processing') {
+                    // Show progress
+                    progressContainer.classList.remove('hidden');
+                    progressBar.style.width = `${data.progress || 0}%`;
+                    progressPercent.textContent = `${data.progress || 0}%`;
+                    progressStatus.textContent = 'Processing...';
+                    
+                    // Update file info
+                    fileName.textContent = data.filename;
+                    fileInfo.classList.remove('hidden');
+                    
+                    // Start polling
+                    startPolling();
+                    
+                } else if (data.status === 'completed') {
+                    // Show results
+                    if (data.results) {
+                        displayResults(data.results);
+                    }
+                    
+                    // Update file info
+                    fileName.textContent = data.filename;
+                    fileInfo.classList.remove('hidden');
+                    
+                    // Enable analyze button for re-analysis
+                    analyzeBtn.disabled = false;
+                    
+                } else if (data.status === 'failed') {
+                    showAlert('This job failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+                
+                // Update active job in list
+                document.querySelectorAll('.job-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.querySelector(`[data-job-id="${jobId}"]`)) {
+                        item.classList.add('active');
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading job:', error);
+                showAlert('Failed to load job: ' + error.message, 'error');
+            }
+        }
+        
+        async function deleteJob(jobId) {
+            if (!confirm('Are you sure you want to delete this job?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${JOB_STATUS_ENDPOINT}/${jobId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to delete job');
+                }
+                
+                // Refresh jobs list
+                loadJobsList();
+                
+                // If current job was deleted, reset UI
+                if (jobId === currentJobId) {
+                    resetUIState();
+                    resetFileSelection();
+                    analyzeBtn.disabled = true;
+                    currentJobId = null;
+                }
+                
+                showAlert('Job deleted successfully.', 'success');
+                
+            } catch (error) {
+                console.error('Error deleting job:', error);
+                showAlert('Failed to delete job: ' + error.message, 'error');
+            }
+        }
+        
+        function showAlert(message, type = 'success') {
+            // Remove any existing alerts
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Create alert element
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            
+            // Set icon based on type
+            let icon = '';
+            switch (type) {
+                case 'success':
+                    icon = '<i class="fas fa-check-circle"></i>';
+                    break;
+                case 'warning':
+                    icon = '<i class="fas fa-exclamation-triangle"></i>';
+                    break;
+                case 'error':
+                    icon = '<i class="fas fa-times-circle"></i>';
+                    break;
+                default:
+                    icon = '<i class="fas fa-info-circle"></i>';
+            }
+            
+            alert.innerHTML = `${icon} ${message}`;
+            
+            // Insert before main content
+            document.querySelector('.main-content').insertAdjacentElement('beforebegin', alert);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+        
+        function formatTimeAgo(timestamp) {
+            const now = Date.now();
+            const diff = now - timestamp * 1000;
+            
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            
+            if (days > 0) {
+                return `${days} day${days > 1 ? 's' : ''} ago`;
+            } else if (hours > 0) {
+                return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            } else if (minutes > 0) {
+                return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            } else {
+                return 'just now';
+            }
+        }
+        
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            // Initially disable the file selection and upload until a category is selected
+            selectFileBtn.disabled = true;
+            uploadBtn.disabled = true;
+            analyzeBtn.disabled = true;
+            
+            // Load jobs list on startup
+            loadJobsList();
+            
+            // Show version info in console
+            console.log('Chart Similarity Analyzer v2.0');
+            console.log('Connected to API at:', API_BASE_URL);
+        });
+    </script>
+</body>
+</html>
